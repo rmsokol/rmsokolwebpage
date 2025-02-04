@@ -1,17 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Folder, FileText, Briefcase, BookOpen, Camera, Mail, User, Moon, Sun, Twitter, Linkedin, Github } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 const sections = {
-  "Bio": <p>This is the Bio section.</p>,
-  "Projects": <p>Projects go here.</p>,
-  "Resume": <p>Resume details.</p>,
-  "Blog": <p>Blog articles.</p>,
+  "Bio": <p>I am a <strong>technical instructor, cybersecurity professional, and maker</strong> with a passion for problem-solving and innovation. With expertise spanning <strong>network security, programming, and electrical engineering</strong>, I bring a hands-on approach to building <strong>practical, real-world solutions</strong>—whether in <strong>cyber defense, automation, or homesteading projects</strong>.<br /><br /> I thrive at the intersection of <strong>technology and creativity</strong>, always seeking to <strong>learn, build, and share knowledge</strong>. My work reflects a commitment to <strong>security, innovation, and lifelong learning</strong>, ensuring that every project I undertake is both <strong>functional and impactful</strong>.</p>,
+  "Projects": <ul className='list-disc pl-5'><li>Shelfie App</li><li>Capital Doods</li><li>Courses: "Basic Computing Devices for the Zoomer", "Planning for Collapse", and "Securing the Homestead"</li><li>CertusPath Solutions</li><li>The Solara Group</li><li>LevelUp Productions</li></ul>,
+  "Resume": <iframe src='/resume.pdf' className='w-full h-[600px] border-none'></iframe>,
+  "Blog": <BlogSection />,
   "Resources": <p>Resource links.</p>,
-  "Gallery": <p>Image gallery.</p>,
-  "Contact": <p>Contact info.</p>
+  "Gallery": <GallerySection />,
+  "Contact": <div className='text-center'><p>Feel free to reach out!</p><p>Email: <a href='mailto:your.email@example.com' className='text-blue-400'>your.email@example.com</a></p><p>Connect on <a href='https://linkedin.com' target='_blank' rel='noopener noreferrer' className='text-blue-400'>LinkedIn</a></p></div>
 };
+
+function BlogSection() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    fetch("/blogPosts.json")
+      .then((res) => res.json())
+      .then((data) => setPosts(data));
+  }, []);
+
+  return (
+    <div>
+      {posts.length === 0 ? (
+        <p>No blog posts yet.</p>
+      ) : (
+        posts.map((post, index) => (
+          <div key={index} className="mb-4 p-4 border border-gray-700 rounded-lg">
+            <h3 className="text-xl font-bold">{post.title}</h3>
+            <p className="text-sm text-gray-400">{post.date}</p>
+            <p className="mt-2">{post.content}</p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function GallerySection() {
+  const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    fetch("/galleryImages.json")
+      .then((res) => res.json())
+      .then((data) => setImages(data));
+  }, []);
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {images.length === 0 ? (
+        <p>No images yet.</p>
+      ) : (
+        images.map((image, index) => (
+          <div key={index} className="p-2 border border-gray-700 rounded-lg">
+            <img src={image.url} alt={image.caption} className="w-full rounded-lg" />
+            <p className="text-sm text-gray-400 mt-2">{image.caption}</p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
 
 export default function FileDirectoryWebsite() {
   const [activeSection, setActiveSection] = useState("Bio");
@@ -48,15 +99,9 @@ export default function FileDirectoryWebsite() {
           <a href="https://github.com" target="_blank" rel="noopener noreferrer"><Github size={20} /></a>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto">
-        <motion.div
-          key={activeSection}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-        >
+        <motion.div key={activeSection} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
           <Card>
             <CardContent className="p-6">{sections[activeSection]}</CardContent>
           </Card>
@@ -66,15 +111,3 @@ export default function FileDirectoryWebsite() {
   );
 }
 
-function getIcon(section) {
-  const icons = {
-    "Bio": <User size={18} />, 
-    "Projects": <Folder size={18} />, 
-    "Resume": <Briefcase size={18} />, 
-    "Blog": <BookOpen size={18} />, 
-    "Resources": <FileText size={18} />, 
-    "Gallery": <Camera size={18} />, 
-    "Contact": <Mail size={18} />
-  };
-  return icons[section] || <FileText size={18} />;
-}
